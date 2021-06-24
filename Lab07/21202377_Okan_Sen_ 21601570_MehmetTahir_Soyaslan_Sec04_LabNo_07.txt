@@ -1,0 +1,153 @@
+// This code shows and rotates the pattern (10001000) right or stops based on the
+//input coming from the user. The pattern is to be shown on the LEDs.
+int stop = 0;
+int initial = 0b01110111; //Initial pattern. Note that 0 means on, while 1 means off.
+int right = 1;
+int temp; // New variable to store the last pattern in case the user freezes the loop. So that we can continue from the last pattern.
+void main(){
+TRISD = 0x0; // All bits of PORTD are output. ~0 means output~
+// Three bits of PORTA are inputs but only one of them is used in this example as a
+//stop button, others are redundant. ~1 means input~
+TRISA = 0b111;
+// From PORTD, outputs will be sent to LEDs. Make sure that you physically connected
+//them by looking at Figure 1, in the directives document.
+// Initial pattern is sent to the LEDs through PORTD.
+PORTD = initial;
+while(1){
+int lsb; //least significant bit
+int msb; // most significant bit
+int mask;
+
+
+// Stop button is the push-button which is labeled as 1 on the board.
+
+
+if(PORTABits.RA1 == 0){ // If stop button clicked
+       stop = !stop;
+       if (stop) {
+        temp = PORTD; // We set temp to PORTD value in case we freeze it.
+        }
+        if(!stop){
+        // If process restarted, copy temp pattern into PORTD.
+        PORTD = temp;
+        }
+}
+else if(PORTABits.RA2 == 0){
+     right = !right;
+      /* if (right) {
+        temp = PORTD; // We set temp to PORTD value in case we freeze it.
+        }
+        if(!right){
+        // If process restarted, copy temp pattern into PORTD.
+        PORTD = temp;
+        } */
+}
+if(!stop){
+        //Rotate right
+        if (!stop && !right) {
+                lsb = PORTD & 0x1; // Extract least significant bit
+                mask = lsb << 7; // Least significant bit will be the msb of the shifted pattern
+                PORTD = (PORTD >> 1) | mask; // Paste lsb to the leftmost bit the right shifted portd
+        }
+        //Rotate left
+        else if (!stop && right) {
+                msb = (PORTD & 0x80);
+                mask = msb >> 7; // Take PORTD's 8th bit and shift right by 7
+                PORTD = (PORTD << 1) | mask; // Shift portd left by 1 bit and or with msb which is 00..0 or 00..1
+        }
+
+
+
+
+} else {
+//Do not shift anything, that is, stop.
+PORTD = 0b11111111;
+}
+delay_ms(1000); // Wait 1 second.
+}
+}
+// Rotation ends here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int dig1;
+int dig2;
+int dig3;
+int dig4;
+int i;
+int count;
+
+void sevSeg( int val)
+{
+ //Map for hexa values of digits for seven segment
+ unsigned char MAP[10]  = { 0x3f,0x06, 0x5b,0x4f, 0x66, 0x6d,0x7d, 0x07,0x7f,0x6f};
+           for(i = 0; i < 100; i++)
+           {
+          // find the first digit
+          dig1 = (val /1000) %10;
+          PORTA = MAP[dig1];
+          PORTB = 0b0001;
+          Delay_Ms(5);
+          // find the second digit
+          dig2 = (val /100)  %10;
+          PORTA = MAP[dig2];
+          PORTB = 0b0010;
+          Delay_Ms(5);
+          //find the 3rd digit
+          dig3 = ( (val /10) % 10);
+          PORTA = MAP[dig3];
+          PORTB = 0b0100;
+          Delay_Ms(5);
+          //find the 4th digit
+          dig4 = val % 10;
+          PORTA = MAP[dig4];
+          PORTB = 0b1000;
+          Delay_Ms(5);
+              }
+}
+void main() {
+    int x;
+    int x3;
+
+  AD1PCFG = 0xFFFF;   // Configure AN pins as digital I/O
+  JTAGEN_bit = 0;     // Disable JTAG
+
+  TRISA = 0;          // set direction to be output
+  TRISB = 0;          // set direction to be output
+  TRISC = 0;          // set direction to be output
+  TRISD = 0;          // set direction to be output
+  TRISE = 0;          // set direction to be output
+  TRISF = 0;          // set direction to be output
+  TRISG = 0;          // set direction to be output
+
+  while(1) {
+
+      x = 1;
+
+          for( count = 0 ; count < 21; count++)
+          {
+             x3 = x*x*x; //find c^3
+             sevSeg(x3); //print
+             x++; ///increase
+
+          }
+    }
+    }
